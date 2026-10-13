@@ -1062,6 +1062,55 @@ CPU threads multiplied across server threads; `slm serve --threads` (default 2) 
 
 ---
 
+## E.7 Ready for the Hugging Face Hub (added after v0.1.0)
+
+**What.** Since export CODE_VERSION 4, the model card opens with the metadata the Hugging Face Hub
+reads, and its "Data and licence" section comes from the project (`model_card_info()`, ADR 0010).
+`abc-folk:3` is the same fine-tuned run as `abc-folk:2`, exported again to get the new card.
+
+```bash
+uv run slm export run-9b890db6dced --name abc-folk --version 3
+head -14 ~/slm/models/abc-folk/3/MODEL_CARD.md
+```
+
+```
+checking parity on 3.tmp ...
+  slmkit round trip: max |Δlogit| = 0.0e+00 over 94 tokens
+  transformers 5.17.0: max |Δlogit| = 0.0e+00, tokenizer IDs match: True
+exported abc-folk:3 -> /home/you/slm/models/abc-folk/3
+---
+license: apache-2.0
+library_name: transformers
+pipeline_tag: text-generation
+tags:
+- slmkit
+- llama
+- from-scratch
+- abc-music
+- music
+- abc-notation
+- folk-music
+- symbolic-music
+---
+```
+
+Run again, the export prints `abc-folk:3 already exported from run-9b890db6dced step 1000`: same
+checkpoint, same version, nothing to do. Further down, "Data and licence" states the open question
+about the transcriptions in the card itself, not only in ADR 0005. The tests:
+
+```bash
+uv run pytest -q tests/unit/test_export.py projects/abc_music/tests/test_abc_music.py -k "card or front_matter"
+```
+
+```
+4 passed, 35 deselected
+```
+
+**Why.** Publishing then needs no conversion: upload the directory, and copy `MODEL_CARD.md` to
+`README.md`, the name the Hub displays (serving.md §9).
+
+---
+
 ## Phase E: done when
 
 - [x] `make test` (188), `make test-gpu` (4) and `make lint` pass.

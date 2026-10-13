@@ -274,7 +274,7 @@ $SLM_HOME/models/<name>/<version>/
 ├── model.safetensors           weights only, fp32
 ├── tokenizer.json              HF tokenizers format (char → WordLevel, BPE unchanged)
 ├── tokenizer_config.json       lets AutoTokenizer find <unk> and <eos>
-├── MODEL_CARD.md               how to prompt it, training, eval results, parity, limitations
+├── MODEL_CARD.md               Hub metadata (YAML), how to prompt it, training, eval, parity, data
 └── manifest.json               lineage (run, tokenizer) and the parity check results
 ```
 

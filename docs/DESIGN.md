@@ -546,7 +546,8 @@ one allowed exception is `export --to-windows`.
 
 - `slm export <run_id> --name abc-folk --version 1` writes an HF-format directory
   (`config.json` for `LlamaForCausalLM`, `generation_config.json`, `model.safetensors`, tokenizer
-  files) plus `MODEL_CARD.md` (prompt format, params, tokens, eval summary, parity, lineage) and a
+  files) plus `MODEL_CARD.md` (prompt format, params, tokens, eval summary, parity, lineage; Hub
+  metadata and the project's licence and data statement from `model_card_info()`, ADR 0010) and a
   manifest. Versions are immutable; `slm lineage abc-folk:1` walks back to the raw data.
 - **Acceptance test, run on every export before it is published:** slmkit reloads the files with
   identical logits, and HF `transformers` (when installed) matches within 1e-4 from the same token

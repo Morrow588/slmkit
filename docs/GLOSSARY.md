@@ -434,6 +434,13 @@ possible on one consumer GPU.
 **HF — Hugging Face.** The company and ecosystem behind the `transformers` library and the model
 hub. "HF format" is the de-facto standard model layout, which is why slmkit exports to it.
 
+**Hub (Hugging Face Hub).** huggingface.co's hosting for models, datasets and demos, each a git
+repository. A model's page is its `README.md`, and a YAML block at the top gives its licence, task and
+tags. The registry analogy: a container registry for model files.
+
+**Space.** A demo app hosted on the Hub, built from its own git repository. A *Docker* Space builds the
+repository's Dockerfile and sends visitors to one port; slmkit's runs `slm serve` (ADR 0010).
+
 **safetensors.** A tensor file format that is safe to load from untrusted sources, unlike
 Python's `pickle`.
 
@@ -443,7 +450,8 @@ addresses exports as `name:version`, like a container image tag, and never chang
 
 **Model card.** The README that travels with a model: what it is for, how to prompt it, what it was
 trained on, how it scored, and where it fails. From Mitchell et al. (2019), "Model Cards for Model
-Reporting". slmkit generates `MODEL_CARD.md` from the export's manifest.
+Reporting". slmkit generates `MODEL_CARD.md` from the export's manifest; its YAML header is the
+metadata the Hugging Face Hub reads (ADR 0010).
 
 **Parity check.** Loading an export with a second implementation (slmkit's own loader, then HF
 `transformers`) and confirming the logits match the original checkpoint's. It catches exports that
