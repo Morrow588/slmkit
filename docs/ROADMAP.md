@@ -148,7 +148,7 @@ buttons execute read-only commands from a fixed list only. *~3–4 sessions, no 
 
 ---
 
-## Release v0.1.0 — ready for visitors ◐
+## Release v0.1.0 — ready for visitors ☑
 
 Goal: a public repo a newcomer can evaluate in a minute and contribute to without asking. *No GPU.*
 
@@ -158,8 +158,8 @@ Goal: a public repo a newcomer can evaluate in a minute and contribute to withou
       hardware requirements (tested on WSL2; native Linux expected; no macOS or AMD).
 - [x] Issue templates (bug report asks for `make doctor` output), a pull-request checklist.
 - [x] `CHANGELOG.md` with v0.1.0 (M0–M2, slm studio).
-- [ ] The v0.1.0 release tagged from it.
-- [ ] Repository topics, and Discussions enabled for questions.
+- [x] The v0.1.0 release tagged from it (2026-10-13).
+- [x] Repository topics, and Discussions enabled for questions.
 
 ---
 
