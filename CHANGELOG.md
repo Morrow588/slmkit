@@ -7,12 +7,6 @@ interfaces; each entry says what moved. Milestones (M0, M1, …) are described i
 
 ## [Unreleased]
 
-### Added
-- CI on every push and pull request: lint (ruff, mypy) and the CPU test suite.
-- Issue templates (bug report with `make doctor` output, feature or project idea), a pull-request
-  checklist, and this changelog.
-- README: a "Results so far" table with sourced numbers, badges, and plainer hardware requirements.
-
 ## [0.1.0] - 2026-10-13
 
 The engine and its first two projects: a character-level Shakespeare model that reproduces a published
@@ -59,6 +53,12 @@ reference, and a folk-tune model taken through the whole lifecycle.
   lifecycle as real artifacts with lineage, training curves and samples, experiments with spreads, a
   parameter calculator, the playground for every exported model, the docs with glossary hovers, and
   Verify, which runs the runbooks' read-only checks.
+
+**Repository**
+- CI on every push and pull request: lint (ruff, mypy) and the CPU test suite.
+- Issue templates (bug report with `make doctor` output, feature or project idea), a pull-request
+  checklist, and this changelog.
+- README: a "Results so far" table with sourced numbers, badges, and plainer hardware requirements.
 
 **Documentation**
 - A concepts page for every stage, a hands-on runbook per milestone with real expected output, ADRs
