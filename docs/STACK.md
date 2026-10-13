@@ -356,6 +356,20 @@ TLS and rate limiting are deliberately left to a gateway in front of it (M4). Re
 (no request typing); Python's `http.server` (validation and JSON by hand); TorchServe and NVIDIA
 Triton Inference Server, which are built for fleets of GPU models, not one 3.5 MB file.
 
+### Hugging Face Hub, Spaces and the `hf` CLI
+**◐** (after v0.1.0; not a dependency) · `huggingface_hub 2.2` via `uvx` ·
+[Hub](https://huggingface.co/docs/hub) · [Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker) ·
+[CLI](https://huggingface.co/docs/huggingface_hub/guides/cli)
+
+**What it is.** Hugging Face's hosting for models and demo apps, each a git repository, and the
+command-line client that uploads to it.
+
+**Why.** Publishing an export where anyone can load it with `transformers` or try it in a browser.
+Exports are already HF-format and their cards carry the Hub's metadata (ADR 0010), so publishing is
+`hf upload`. The demo is a *Docker* Space running `slm serve` itself. Run through `uvx`, the CLI
+installs nothing into slmkit. Rejected: a Gradio Space (a second UI, and a framework slmkit doesn't
+use); making `huggingface_hub` a dependency for an occasional, manual step.
+
 ### HTTPX
 **●** extra `dev` · `0.28` · [docs](https://www.python-httpx.org/)
 

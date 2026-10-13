@@ -7,12 +7,14 @@ from pathlib import Path
 
 import pytest
 import torch
+import yaml
 from safetensors.torch import load_file
 from typer.testing import CliRunner
 
 from slmkit import artifacts
 from slmkit.cli import app
 from slmkit.config import ConfigError, load_experiment
+from slmkit.export.card import front_matter
 from slmkit.export.hf import export_run, load_export, parse_ref
 from slmkit.export.windows import to_windows
 from slmkit.inference import load_run
@@ -79,6 +81,27 @@ def test_model_card_describes_prompt_and_missing_eval(toy_run: str) -> None:
     card = (export_run(toy_run, "toy-model", 1, **QUIET) / "MODEL_CARD.md").read_text()
     assert "# toy-model:1" in card and "```\nabc\n```" in card  # the toy eval prompt
     assert "Not evaluated" in card
+
+
+def test_model_card_opens_with_hub_metadata(toy_run: str) -> None:
+    card = (export_run(toy_run, "toy-model", 1, **QUIET) / "MODEL_CARD.md").read_text()
+    assert card.startswith("---\n")
+    meta = yaml.safe_load(card.split("---\n")[1])
+    # The toy project states no licence (the default): the card mustn't invent one.
+    assert "license" not in meta
+    assert meta["library_name"] == "transformers" and meta["pipeline_tag"] == "text-generation"
+    assert meta["tags"][:3] == ["slmkit", "llama", "from-scratch"] and "toy" in meta["tags"]
+    assert "projects/toy/README.md" in card  # no data statement: point to the README
+
+
+def test_front_matter_uses_the_projects_licence_and_tags() -> None:
+    meta = yaml.safe_load(
+        front_matter("abc_music", {"license": "apache-2.0", "tags": ["music", "slmkit"]}).strip(
+            "-\n"
+        )
+    )
+    assert meta["license"] == "apache-2.0"
+    assert meta["tags"] == ["slmkit", "llama", "from-scratch", "abc-music", "music"]  # no repeats
 
 
 def test_to_windows_writes_rendered_samples(toy_run: str, tmp_path: Path, slm_home: Path) -> None:

@@ -6,7 +6,8 @@
         model.safetensors        the weights, fp32, tied output head stored once
         tokenizer.json           Hugging Face tokenizers format (char -> WordLevel, BPE as is)
         tokenizer_config.json    lets `AutoTokenizer.from_pretrained` find the special tokens
-        MODEL_CARD.md            what it is, how to prompt it, how it was trained and scored
+        MODEL_CARD.md            what it is, how to prompt it, how it was trained and scored;
+                                 its YAML header is the Hugging Face Hub's metadata
         manifest.json            lineage (run, tokenizer) and the parity check results
 
 Because slmkit's parameter names already match `LlamaForCausalLM` (docs/MODEL.md), export is a
@@ -22,6 +23,7 @@ a no-op, and a different checkpoint needs a new version number. Serving addresse
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import shutil
 from collections.abc import Callable
@@ -46,7 +48,8 @@ from slmkit.tokenizers import EOS_ID, Tokenizer, load_tokenizer
 from slmkit.tokenizers.base import EOS, UNK
 from slmkit.train.run import read_status
 
-CODE_VERSION = 3  # bump when the files an export writes would change (2: ui/; 3: example prompts)
+CODE_VERSION = 4  # bump when the files an export writes would change (2: ui/; 3: example
+# prompts; 4: Hub metadata on the card, ADR 0010)
 MODELS_DIR = "models"
 WEIGHTS = "model.safetensors"
 CARD = "MODEL_CARD.md"
@@ -320,6 +323,8 @@ def export_run(
         "example_prompt": example_prompt(prompts),
         # Every prompt the evaluation used, so a playground can offer them as one-click examples.
         "example_prompts": [{"id": p.id, "prompt": p.prompt} for p in prompts[:12]],
+        # Licence, subject tags and data statement for the card: only the project knows them.
+        "card": dataclasses.asdict(project.model_card_info()),
         "eval": (
             {
                 "eval_id": report["eval_id"],

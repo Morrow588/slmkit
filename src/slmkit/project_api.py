@@ -68,6 +68,21 @@ class TokenizerSpec:
     tokens: tuple[str, ...] | None = None  # fixed: the complete vocabulary, in ID order
 
 
+@dataclass(frozen=True)
+class ModelCardInfo:
+    """What a published model's card says about its rights and subject (ADR 0010).
+
+    The engine writes the rest of the card from the run; only the project knows what its data
+    is and whether the weights can be licensed. `license` is a Hugging Face licence ID
+    ("apache-2.0", "mit", "other", ...); None leaves it unstated. `data` is Markdown for the
+    card's "Data and licence" section: the source, its licence, and any risk a reuser should know.
+    """
+
+    license: str | None = None
+    tags: tuple[str, ...] = ()  # subject tags for the Hub, e.g. ("music", "abc-notation")
+    data: str = ""
+
+
 # A grader is a pure function: (prompt, generated text) -> named scores.
 Grader = Callable[[EvalPrompt, str], dict[str, float]]
 
@@ -135,6 +150,11 @@ class Project(ABC):
         Default: the text itself. A project can add a rendering a person can use directly,
         e.g. MIDI for music or a PGN for chess."""
         return {".txt": text.encode()}
+
+    def model_card_info(self) -> ModelCardInfo:
+        """The licence, subject tags and data statement for this project's exported models
+        (ADR 0010). Default: nothing stated; the card points to the project's README."""
+        return ModelCardInfo()
 
     def web_viewer(self) -> Path | None:
         """A directory of static files that draws this project's outputs in `slm serve`'s web

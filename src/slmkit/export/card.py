@@ -4,6 +4,9 @@ Everything on the card comes from the export's manifest (itself built from the r
 status, checkpoint and latest eval report), so the card can't drift from the files it
 describes. Model cards are a convention from Mitchell et al. (2019), "Model Cards for Model
 Reporting": what the model is for, how it was trained, how it scored, and where it fails.
+
+The card opens with a YAML block that the Hugging Face Hub reads as the model's metadata
+(licence, library, tags), so the same file works as the model's page there (ADR 0010).
 """
 
 from __future__ import annotations
@@ -11,16 +14,21 @@ from __future__ import annotations
 import json
 from typing import Any
 
+import yaml
+
 STAGE_WORDS = {
     "pretrain": "a **pretrained base model**: it continues text in the style of its training data",
     "sft": "a **fine-tuned (SFT) model**: it answers requests in the format it was fine-tuned on",
 }
 
+REPO = "https://github.com/m87techlabs/slmkit"
+
 TEMPLATE = """\
+{front_matter}
 # {ref}
 
 A {params:,}-parameter Llama-style language model trained from scratch with
-[slmkit](https://github.com/m87techlabs/slmkit) for the `{project}` project. It is {stage_words}.
+[slmkit]({repo}) for the `{project}` project. It is {stage_words}.
 
 ## How to prompt it
 
@@ -30,7 +38,8 @@ as the evaluation used it:
 ```
 {example}```
 
-Serve it and ask over HTTP:
+Serve it and ask over HTTP. A copy downloaded from the Hugging Face Hub goes in
+`$SLM_HOME/models/{path}/` first; that is where `slm serve` looks for `{ref}`.
 
 ```bash
 uv run slm serve --model {ref}
@@ -43,8 +52,9 @@ checkpoint:
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
-tok = AutoTokenizer.from_pretrained("$SLM_HOME/models/{path}")
-model = AutoModelForCausalLM.from_pretrained("$SLM_HOME/models/{path}")
+path = "$SLM_HOME/models/{path}"  # or its Hugging Face Hub repo ID, if it was published there
+tok = AutoTokenizer.from_pretrained(path)
+model = AutoModelForCausalLM.from_pretrained(path)
 ```
 
 ## Model
@@ -81,9 +91,7 @@ Checked before it was published, over {parity_tokens} tokens: slmkit reloads the
 
 ## Data and licence
 
-Training data, its source and its licence: `projects/{project}/README.md` in the slmkit
-repository.
-
+{data}
 ## Limitations
 
 - **Context of {block_size} tokens.** slmkit's sampler keeps only the last {block_size} tokens as
@@ -112,6 +120,27 @@ def _evaluation(ev: dict[str, Any] | None) -> str:
     )
 
 
+def front_matter(project: str, card: dict[str, Any]) -> str:
+    """The Hub's metadata block. `pipeline_tag` makes the Hub offer text generation, and
+    `library_name` tells it the files load with `transformers` (they do: export checks it)."""
+    meta: dict[str, Any] = {}
+    if card.get("license"):
+        meta["license"] = card["license"]
+    meta["library_name"] = "transformers"
+    meta["pipeline_tag"] = "text-generation"
+    tags = ["slmkit", "llama", "from-scratch", project.replace("_", "-"), *card.get("tags", [])]
+    meta["tags"] = list(dict.fromkeys(tags))  # in order, without repeats
+    return f"---\n{yaml.safe_dump(meta, sort_keys=False)}---\n"
+
+
+def _data(project: str, card: dict[str, Any]) -> str:
+    readme = f"[`projects/{project}/README.md`]({REPO}/blob/main/projects/{project}/README.md)"
+    statement = card.get("data", "").strip()
+    if not statement:
+        return f"Training data, its source and its licence: {readme} in the slmkit repository.\n"
+    return f"{statement}\n\nMore detail: {readme} in the slmkit repository.\n"
+
+
 def model_card(manifest: dict[str, Any]) -> str:
     s, c = manifest["stats"], manifest["config"]
     parity = s.get("parity", {})
@@ -123,7 +152,10 @@ def model_card(manifest: dict[str, Any]) -> str:
     else:
         hf_line = f"`transformers` check: {parity.get('transformers', 'not run')}."
     example = s["example_prompt"]
+    card = s.get("card", {})  # exports before ADR 0010 recorded none
     return TEMPLATE.format(
+        front_matter=front_matter(manifest["project"], card),
+        repo=REPO,
         ref=manifest["id"],
         project=manifest["project"],
         stage_words=STAGE_WORDS.get(s["stage"], s["stage"]),
@@ -150,4 +182,5 @@ def model_card(manifest: dict[str, Any]) -> str:
         parity_tokens=parity.get("tokens", "?"),
         slmkit_diff=parity.get("slmkit_max_abs_diff", 0.0),
         hf_line=hf_line,
+        data=_data(manifest["project"], card),
     )

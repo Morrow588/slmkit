@@ -2,7 +2,7 @@
 
 *Milestone M2, Phase E. Code: [`src/slmkit/export/`](../../src/slmkit/export/) (export, model card,
 Windows copy), [`src/slmkit/serve/app.py`](../../src/slmkit/serve/app.py) (the HTTP API). Decision:
-[ADR 0007](../decisions/0007-model-export-and-render-hook.md). File formats:
+[ADR 0007](../decisions/0007-model-export-and-render-hook.md), and [ADR 0010](../decisions/0010-publishing-to-the-hub.md) for publishing. File formats:
 [`../MODEL.md`](../MODEL.md) §6. Terms: [`../GLOSSARY.md`](../GLOSSARY.md). Hands-on:
 [`../runbooks/m2-abc-music.md`](../runbooks/m2-abc-music.md) §E.*
 
@@ -268,7 +268,55 @@ To work on a viewer without re-exporting, point the server at the project's copy
 
 ---
 
-## 9. What export doesn't do yet
+## 9. Publishing: the Hugging Face Hub and a public playground
+
+An export is already the layout the Hugging Face Hub expects, so publishing one is an upload. Two
+things make the result useful there (ADR 0010).
+
+**The card carries the Hub's metadata.** The Hub reads a model's licence, task and tags from a YAML
+block at the top of its `README.md`. `MODEL_CARD.md` starts with one:
+
+```yaml
+---
+license: apache-2.0
+library_name: transformers
+pipeline_tag: text-generation
+tags:
+- slmkit
+- llama
+- from-scratch
+- abc-music
+- music
+- abc-notation
+- folk-music
+- symbolic-music
+---
+```
+
+`library_name` and `pipeline_tag` are true of every export: `slm export` has already proved that
+`transformers` loads it and generates the same tokens. The licence and the last four tags come from the
+project, through `Project.model_card_info()`, together with the "Data and licence" section. Only the
+project knows whether its weights can be licensed: that depends on the training data. `abc_music`
+says Apache-2.0 *and* states the open question about its transcriptions (ADR 0005), with the promise to
+withdraw the model if anyone objects. A project that says nothing gets no licence on its card rather
+than an invented one.
+
+**The demo is `slm serve`, unchanged.** A Hugging Face *Space* is a demo app built from its own git
+repository; a Docker Space builds a Dockerfile and sends visitors to one port. slmkit's Space installs
+CPU-only PyTorch and a released slmkit, downloads the model by version tag, and runs
+`slm serve --host 0.0.0.0 --port 7860`. The page visitors see is the playground from §8, viewer and
+all. Measured on the same recipe in a clean environment: one jig, 160 tokens, in 0.36 s on a CPU.
+
+**Rejected:** a Gradio app, the Hub's usual choice. It would be a second interface to keep in step with
+the first, and a framework slmkit doesn't otherwise use (CONTRIBUTING.md rule 6). **Rejected:** renaming
+`MODEL_CARD.md` to `README.md`; the upload copies it instead.
+
+Versions carry over: `abc-folk:3` is the model repository's tag `v3`, and the Space downloads that tag,
+so it keeps serving the version it was built for.
+
+---
+
+## 10. What export doesn't do yet
 
 - **GGUF** for llama.cpp and Ollama (M4). A char-level vocabulary needs a custom tokenizer mapping
   there, verified per project.

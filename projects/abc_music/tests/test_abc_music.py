@@ -221,3 +221,10 @@ def test_header_dropout_rate_is_roughly_as_configured() -> None:
         for i in range(2000)
     )
     assert 0.3 < dropped / 2000 < 0.5
+
+
+def test_model_card_states_the_licence_and_the_open_question() -> None:
+    info = PROJECT.model_card_info()
+    assert info.license == "apache-2.0" and "abc-notation" in info.tags
+    # The card must carry ADR 0005's residual risk, not only the reassuring part.
+    assert "public-domain" in info.data and "no licence of their own" in info.data
