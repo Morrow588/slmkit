@@ -13,7 +13,7 @@ interfaces; each entry says what moved. Milestones (M0, M1, …) are described i
   checklist, and this changelog.
 - README: a "Results so far" table with sourced numbers, badges, and plainer hardware requirements.
 
-## [0.1.0] - 2026-10-09
+## [0.1.0] - 2026-10-13
 
 The engine and its first two projects: a character-level Shakespeare model that reproduces a published
 reference, and a folk-tune model taken through the whole lifecycle.
