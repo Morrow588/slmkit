@@ -14,7 +14,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from slmkit.project_api import Doc, EvalPrompt, Grader, Project, TokenizerSpec
+from slmkit.project_api import Doc, EvalPrompt, Grader, ModelCardInfo, Project, TokenizerSpec
 from slmkit.registry import register_project
 
 SOURCE_URL = (
@@ -83,3 +83,15 @@ class ShakespeareChar(Project):
     def graders(self) -> list[Grader]:
         # Validation loss is this project's grade; there is no domain grader to add.
         return []
+
+    def model_card_info(self) -> ModelCardInfo:
+        return ModelCardInfo(
+            license="apache-2.0",
+            tags=("shakespeare", "character-level"),
+            data=(
+                "Trained on Tiny Shakespeare (`tinyshakespeare/input.txt` from "
+                "[karpathy/char-rnn](https://github.com/karpathy/char-rnn)), about 1.1M characters "
+                "of Shakespeare's plays, which are in the **public domain**. The weights are "
+                "released under Apache-2.0, the same licence as slmkit."
+            ),
+        )

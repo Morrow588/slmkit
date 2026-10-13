@@ -29,5 +29,6 @@ from __future__ import annotations
 #     def graders(self): ...                  # domain graders only; generic ones come
 #                                             # from slmkit.graders
 #
-#     Optional: augment (train split only), split_exclusions, sft_examples, logits_processor.
+#     Optional: augment (train split only), split_exclusions, sft_examples, logits_processor,
+#     render_sample, web_viewer, model_card_info (licence and data statement for exports).
 #     See projects/shakespeare_char/project.py for a complete, small example.

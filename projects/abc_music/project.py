@@ -20,7 +20,15 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from slmkit.project_api import Doc, EvalPrompt, Grader, Project, SFTExample, TokenizerSpec
+from slmkit.project_api import (
+    Doc,
+    EvalPrompt,
+    Grader,
+    ModelCardInfo,
+    Project,
+    SFTExample,
+    TokenizerSpec,
+)
 from slmkit.registry import register_project
 
 from .abcnotation import (
@@ -82,6 +90,22 @@ def request(
 
 # A title shared by more than this many tunes is generic ("Reel", "Minuet"), not an identity.
 MAX_TITLE_SHARE = 3
+
+
+# The "Data and licence" section of every exported model's card (model_card_info, ADR 0010).
+CARD_DATA = """\
+Trained on 4,248 tunes in ABC notation from three **public-domain** tune books: Ryan's Mammoth
+Collection (1883), O'Neill's Music of Ireland (1903) and Aird's Selection of Airs (1778–1803), as
+transcribed by volunteers and shipped in the [`music21`](https://github.com/cuthbertLab/music21)
+package (BSD-3-Clause).
+
+**One open question, stated plainly.** The printed books are public domain, but the transcription
+files carry no licence of their own. Faithful transcriptions of public-domain scores are generally
+not treated as new creative work, but that is an assumption, not a grant. If a transcriber or
+rights-holder objects, the collection is removed, the model retrained, and this version withdrawn.
+The Session's data was deliberately *not* used: its licence forbids training language models.
+
+The weights are released under Apache-2.0, the same licence as slmkit."""
 
 
 class AbcArgs(BaseModel):
@@ -266,6 +290,14 @@ class AbcMusic(Project):
         from .graders import GRADERS
 
         return list(GRADERS)
+
+    def model_card_info(self) -> ModelCardInfo:
+        """Weights under the repo's licence, with the data's one open question stated (ADR 0005)."""
+        return ModelCardInfo(
+            license="apache-2.0",
+            tags=("music", "abc-notation", "folk-music", "symbolic-music"),
+            data=CARD_DATA,
+        )
 
     def web_viewer(self) -> Path:
         """Sheet music, in-browser playback and downloads for `slm serve`'s page (web/viewer.js)."""
