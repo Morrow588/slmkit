@@ -8,6 +8,8 @@ interfaces; each entry says what moved. Milestones (M0, M1, …) are described i
 ## [Unreleased]
 
 ### Added
+- `slm runs list --json` prints full run statuses as a JSON array for scripts, optionally filtered
+  with `--project`; empty results produce `[]`.
 - Model cards open with Hugging Face Hub metadata (licence, library, task, tags), so an export can be
   uploaded as is. A new optional Project API hook, `model_card_info()`, gives the licence, subject tags
   and data statement; `abc_music` and `shakespeare_char` state theirs (ADR 0010). Export code version 4.
